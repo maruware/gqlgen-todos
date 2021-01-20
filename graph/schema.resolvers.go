@@ -58,6 +58,31 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 	}, nil
 }
 
+func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+	var records []entity.Todo
+	if err := r.DB.Find(&records).Error; err != nil {
+		return nil, err
+	}
+
+	todos := []*model.Todo{}
+	for _, record := range records {
+		todos = append(todos, model.NewTodoFromEntity(&record))
+	}
+	return todos, nil
+}
+
+func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
+	userID, err := strconv.Atoi(obj.UserID)
+	if err != nil {
+		return nil, err
+	}
+	var record entity.User
+	if err := r.DB.Find(&record, userID).Error; err != nil {
+		return nil, err
+	}
+	return model.NewUserFromEntity(&record), nil
+}
+
 func (r *userResolver) Todos(ctx context.Context, obj *model.User) ([]*model.Todo, error) {
 	userID, err := strconv.Atoi(obj.ID)
 	if err != nil {
@@ -82,9 +107,13 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Todo returns generated.TodoResolver implementation.
+func (r *Resolver) Todo() generated.TodoResolver { return &todoResolver{r} }
+
 // User returns generated.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type todoResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
