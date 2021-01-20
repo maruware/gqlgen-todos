@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/maruware/gqlgen-todos/dataloader"
 	"github.com/maruware/gqlgen-todos/entity"
 	"github.com/maruware/gqlgen-todos/graph/generated"
 	"github.com/maruware/gqlgen-todos/graph/model"
@@ -72,15 +73,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 }
 
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	userID, err := strconv.Atoi(obj.UserID)
-	if err != nil {
-		return nil, err
-	}
-	var record entity.User
-	if err := r.DB.Find(&record, userID).Error; err != nil {
-		return nil, err
-	}
-	return model.NewUserFromEntity(&record), nil
+	return dataloader.For(ctx).UserByID.Load(obj.UserID)
 }
 
 func (r *userResolver) Todos(ctx context.Context, obj *model.User) ([]*model.Todo, error) {
