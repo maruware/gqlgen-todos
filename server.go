@@ -10,10 +10,10 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/maruware/gqlgen-todos/dataloader"
 	"github.com/maruware/gqlgen-todos/external"
 	"github.com/maruware/gqlgen-todos/graph"
 	"github.com/maruware/gqlgen-todos/graph/generated"
+	"github.com/maruware/gqlgen-todos/loader"
 )
 
 const defaultPort = "8080"
@@ -34,7 +34,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	dataloaderMw := dataloader.DataLoaderMiddleware(db)
+	dataloaderMw := loader.DataLoaderMiddleware(db)
 
 	r.Get("/", playground.Handler("GraphQL playground", "/query"))
 	r.With(dataloaderMw).Post("/query", srv.ServeHTTP)

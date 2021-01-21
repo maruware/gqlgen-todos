@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/maruware/gqlgen-todos/dataloader"
 	"github.com/maruware/gqlgen-todos/entity"
 	"github.com/maruware/gqlgen-todos/graph/generated"
 	"github.com/maruware/gqlgen-todos/graph/model"
+	"github.com/maruware/gqlgen-todos/loader"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
@@ -73,7 +73,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 }
 
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
-	return dataloader.For(ctx).UserByID.Load(obj.UserID)
+	return loader.LoadUser(ctx, obj.UserID)
 }
 
 func (r *userResolver) Todos(ctx context.Context, obj *model.User) ([]*model.Todo, error) {
